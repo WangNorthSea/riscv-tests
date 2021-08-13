@@ -1,0 +1,171 @@
+
+rv64si-p-supervisor：     文件格式 elf64-littleriscv
+
+
+Disassembly of section .text.init:
+
+0000000080000000 <_start>:
+    80000000:	00100513          	li	a0,1
+    80000004:	00000297          	auipc	t0,0x0
+    80000008:	0b028293          	addi	t0,t0,176 # 800000b4 <machine_trap_handler>
+    8000000c:	30529073          	csrw	mtvec,t0
+    80000010:	00000293          	li	t0,0
+    80000014:	7c029073          	csrw	0x7c0,t0
+    80000018:	0c800293          	li	t0,200
+    8000001c:	7c229073          	csrw	0x7c2,t0
+    80000020:	00800293          	li	t0,8
+    80000024:	3002a073          	csrs	mstatus,t0
+    80000028:	08000293          	li	t0,128
+    8000002c:	3042a073          	csrs	mie,t0
+
+0000000080000030 <wait_for_interrupt>:
+    80000030:	0000006f          	j	80000030 <wait_for_interrupt>
+
+0000000080000034 <continue>:
+    80000034:	000022b7          	lui	t0,0x2
+    80000038:	8002829b          	addiw	t0,t0,-2048
+    8000003c:	3002b073          	csrc	mstatus,t0
+    80000040:	000012b7          	lui	t0,0x1
+    80000044:	8002829b          	addiw	t0,t0,-2048
+    80000048:	3002a073          	csrs	mstatus,t0
+    8000004c:	02000293          	li	t0,32
+    80000050:	3032a073          	csrs	mideleg,t0
+    80000054:	00000297          	auipc	t0,0x0
+    80000058:	01028293          	addi	t0,t0,16 # 80000064 <run_supervisor>
+    8000005c:	34129073          	csrw	mepc,t0
+    80000060:	30200073          	mret
+
+0000000080000064 <run_supervisor>:
+    80000064:	00000297          	auipc	t0,0x0
+    80000068:	0e028293          	addi	t0,t0,224 # 80000144 <supervisor_trap_handler>
+    8000006c:	10529073          	csrw	stvec,t0
+    80000070:	00000293          	li	t0,0
+    80000074:	7c029073          	csrw	0x7c0,t0
+    80000078:	0c800293          	li	t0,200
+    8000007c:	7c229073          	csrw	0x7c2,t0
+    80000080:	00200293          	li	t0,2
+    80000084:	1002a073          	csrs	sstatus,t0
+    80000088:	02000293          	li	t0,32
+    8000008c:	1042a073          	csrs	sie,t0
+
+0000000080000090 <wait_here>:
+    80000090:	0000006f          	j	80000090 <wait_here>
+
+0000000080000094 <supervisor_continue>:
+    80000094:	00100513          	li	a0,1
+    80000098:	300022f3          	csrr	t0,mstatus
+    8000009c:	00000073          	ecall
+
+00000000800000a0 <supervisor_continue2>:
+    800000a0:	00100513          	li	a0,1
+    800000a4:	342022f3          	csrr	t0,mcause
+    800000a8:	00000073          	ecall
+
+00000000800000ac <supervisor_continue3>:
+    800000ac:	00000513          	li	a0,0
+    800000b0:	00000073          	ecall
+
+00000000800000b4 <machine_trap_handler>:
+    800000b4:	342022f3          	csrr	t0,mcause
+    800000b8:	fff0031b          	addiw	t1,zero,-1
+    800000bc:	03f31313          	slli	t1,t1,0x3f
+    800000c0:	00730313          	addi	t1,t1,7
+    800000c4:	04628463          	beq	t0,t1,8000010c <machine_ti>
+    800000c8:	00200313          	li	t1,2
+    800000cc:	00628463          	beq	t0,t1,800000d4 <machine_trap_handler+0x20>
+    800000d0:	0d80006f          	j	800001a8 <test_fail>
+    800000d4:	300022f3          	csrr	t0,mstatus
+    800000d8:	00001337          	lui	t1,0x1
+    800000dc:	8003031b          	addiw	t1,t1,-2048
+    800000e0:	000023b7          	lui	t2,0x2
+    800000e4:	8003839b          	addiw	t2,t2,-2048
+    800000e8:	0072f2b3          	and	t0,t0,t2
+    800000ec:	00628463          	beq	t0,t1,800000f4 <machine_trap_handler+0x40>
+    800000f0:	0b80006f          	j	800001a8 <test_fail>
+    800000f4:	00400293          	li	t0,4
+    800000f8:	3022a073          	csrs	medeleg,t0
+    800000fc:	00000297          	auipc	t0,0x0
+    80000100:	fa428293          	addi	t0,t0,-92 # 800000a0 <supervisor_continue2>
+    80000104:	34129073          	csrw	mepc,t0
+    80000108:	30200073          	mret
+
+000000008000010c <machine_ti>:
+    8000010c:	300022f3          	csrr	t0,mstatus
+    80000110:	00002337          	lui	t1,0x2
+    80000114:	8003031b          	addiw	t1,t1,-2048
+    80000118:	0062f2b3          	and	t0,t0,t1
+    8000011c:	00628463          	beq	t0,t1,80000124 <machine_ti+0x18>
+    80000120:	0880006f          	j	800001a8 <test_fail>
+    80000124:	00000293          	li	t0,0
+    80000128:	7c029073          	csrw	0x7c0,t0
+    8000012c:	08000293          	li	t0,128
+    80000130:	3042b073          	csrc	mie,t0
+    80000134:	00000297          	auipc	t0,0x0
+    80000138:	f0028293          	addi	t0,t0,-256 # 80000034 <continue>
+    8000013c:	34129073          	csrw	mepc,t0
+    80000140:	30200073          	mret
+
+0000000080000144 <supervisor_trap_handler>:
+    80000144:	100022f3          	csrr	t0,sstatus
+    80000148:	10000313          	li	t1,256
+    8000014c:	0062f2b3          	and	t0,t0,t1
+    80000150:	00628463          	beq	t0,t1,80000158 <supervisor_trap_handler+0x14>
+    80000154:	0540006f          	j	800001a8 <test_fail>
+    80000158:	142022f3          	csrr	t0,scause
+    8000015c:	fff0031b          	addiw	t1,zero,-1
+    80000160:	03f31313          	slli	t1,t1,0x3f
+    80000164:	00530313          	addi	t1,t1,5 # 2005 <_start-0x7fffdffb>
+    80000168:	02628063          	beq	t0,t1,80000188 <supervisor_ti>
+    8000016c:	00200313          	li	t1,2
+    80000170:	00628463          	beq	t0,t1,80000178 <supervisor_trap_handler+0x34>
+    80000174:	0340006f          	j	800001a8 <test_fail>
+    80000178:	00000297          	auipc	t0,0x0
+    8000017c:	f3428293          	addi	t0,t0,-204 # 800000ac <supervisor_continue3>
+    80000180:	14129073          	csrw	sepc,t0
+    80000184:	10200073          	sret
+
+0000000080000188 <supervisor_ti>:
+    80000188:	00000293          	li	t0,0
+    8000018c:	7c029073          	csrw	0x7c0,t0
+    80000190:	02000293          	li	t0,32
+    80000194:	1042b073          	csrc	sie,t0
+    80000198:	00000297          	auipc	t0,0x0
+    8000019c:	efc28293          	addi	t0,t0,-260 # 80000094 <supervisor_continue>
+    800001a0:	14129073          	csrw	sepc,t0
+    800001a4:	10200073          	sret
+
+00000000800001a8 <test_fail>:
+    800001a8:	00100513          	li	a0,1
+    800001ac:	00000073          	ecall
+
+00000000800001b0 <begin_signature>:
+	...
+
+Disassembly of section .tohost:
+
+0000000080001000 <tohost>:
+	...
+
+0000000080001040 <fromhost>:
+	...
+
+Disassembly of section .riscv.attributes:
+
+0000000000000000 <.riscv.attributes>:
+   0:	2d41                	addiw	s10,s10,16
+   2:	0000                	unimp
+   4:	7200                	ld	s0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <_start-0x7fffffec>
+   c:	00000023          	sb	zero,0(zero) # 0 <_start-0x80000000>
+  10:	7205                	lui	tp,0xfffe1
+  12:	3676                	fld	fa2,376(sp)
+  14:	6934                	ld	a3,80(a0)
+  16:	7032                	0x7032
+  18:	5f30                	lw	a2,120(a4)
+  1a:	326d                	addiw	tp,tp,-5
+  1c:	3070                	fld	fa2,224(s0)
+  1e:	615f 7032 5f30      	0x5f307032615f
+  24:	3266                	fld	ft4,120(sp)
+  26:	3070                	fld	fa2,224(s0)
+  28:	645f 7032 0030      	0x307032645f
